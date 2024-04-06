@@ -54,6 +54,24 @@ pip install numpy pandas scikit-learn tensorflow keras imbalanced-learn scipy ma
 git clone https://github.com/your-username/credit-card-fraud-detection.git
 ```
 
+## Usage
+
+1. **Read the Article**: Please refer to the article [here](https://sifisheriessciences.com/journal/index.php/journal/article/view/463/446) for detailed insights and context regarding the credit card fraud detection problem.
+
+2. **Download Dataset**: Download the credit card CSV file from Kaggle using the following [link](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
+
+3. **Download Python file**: 
+    ```
+ [python file](https://github.com/nirma100/Credit-Card-Fraud-Detection-Project-Exploring-Machine-Learning-Methods/blob/main/main.py)
+    ```
+
+4. **Update File Paths**: If necessary, update file paths in the code to match your local file structure. Look for lines referencing file paths (e.g., Line 15,41,63,216,521) and adjust them accordingly.
+
+6. **Run the Scripts**: Execute the Python scripts in the `main/` directory to preprocess data, train models, and evaluate their performance. 
+
+7. **Review Results**: Once the scripts have completed execution, check the `evaluation_of_models/` directory for the generated output, including performance metrics, visualizations, or any other relevant results.
+
+
 ## Contributing
 
 Contributions to this project are welcome. If you have suggestions for improvement, please fork the repository, make your changes, and submit a pull request.
@@ -66,5 +84,6 @@ Contributions to this project are welcome. If you have suggestions for improveme
 
 - Special thanks to Kaggle for providing the dataset used in this project.
 - Inspiration for this project came from the article of S. Tharun Sainatha Reddy, P. Sriramya, which provided insights into credit card fraud detection methods.
+- Special thanks to **Dima Alberg** for his guidance, encouragement, and dedication to teaching important subjects and pushing us to learn and improve.
 
 Feel free to update this README file with additional information specific to your project as needed.
