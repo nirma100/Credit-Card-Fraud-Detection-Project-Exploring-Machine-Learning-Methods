@@ -1,0 +1,534 @@
+import warnings
+warnings.filterwarnings('ignore')
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+
+#### ##plot histograms of all variables
+
+
+# import matplotlib.pyplot as plt
+# creditCard_path = "C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/לפרוייקט/creditcard.csv"
+# creditCard= pd.read_csv(creditCard_path)
+#
+# data=creditCard.copy()
+# data=data.drop(columns=['Class'])
+# num_cols = data.shape[1]  # Get the number of columns in the DataFrame
+# # Calculate the number of rows and columns for the layout dynamically
+# num_rows = (num_cols - 1) // 5 + 1  # Adjust the number 5 as needed for the number of columns per row
+# num_cols_adjusted = (num_cols - 1) // num_rows + 1
+#
+# plt.figure(figsize=(20, 20))
+# data.hist(layout=(num_rows, num_cols_adjusted), bins=30, figsize=(15, 15))
+# # Increase space between subplots
+# plt.subplots_adjust(hspace=1.5, wspace=1.5)
+# plt.suptitle('Histograms of Credit Card Data Factor\'s Distributions ', fontsize=16)
+#
+# plt.show()
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+# #plotting pie to show the proportion of 1 and 0 in y
+
+
+# import matplotlib.pyplot as plt
+# creditCard_path = "C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/לפרוייקט/creditcard.csv"
+# creditCard= pd.read_csv(creditCard_path)
+#
+# creditCard["Class"].value_counts().plot(kind = 'pie',explode=[0, 0.1],figsize=(6, 6),autopct='%1.1f%%',shadow=True)
+# plt.title("Fraudulent and Non-Fraudulent Distribution",fontsize=20)
+# plt.legend(["Genuine","Fraud"])
+# plt.show()
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+
+### plotting MI graph
+
+
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from sklearn.feature_selection import mutual_info_regression
+#
+# creditCard_path = "C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/לפרוייקט/creditcard.csv"
+# creditCard = pd.read_csv(creditCard_path)
+# y = creditCard.pop('Class')  # Target variable
+# X = creditCard  # Features
+#
+# # Compute Mutual Information
+# mi_scores = mutual_info_regression(X, y, random_state=0)
+# mi_scores = pd.Series(mi_scores, name="MI Scores", index=X.columns)
+# mi_scores = mi_scores.sort_values(ascending=False)
+#
+# # Plotting
+# plt.figure(figsize=(10, 6))
+# mi_scores.plot(kind='barh')
+# plt.title("Mutual Information Scores")
+# plt.xlabel("MI Scores")
+# plt.ylabel("Features")
+# plt.show()
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+#Helpful Methods
+
+import pandas as pd
+###get n_fraud and (N-n_fraud) normal transactions
+def get_random_rows(df, target_col,N, n_fraud):
+    n_fraud = int(n_fraud)
+    if n_fraud > (df[target_col] == 1).sum():  # Check if n_fraud exceeds the number of fraud cases
+        n_fraud = (df[target_col] == 1).sum()
+    y_1_rows = df[df[target_col] == 1].sample(n=n_fraud, random_state=42)
+    y_0_rows = df[df[target_col] == 0].sample(n=(N-n_fraud), random_state=42)
+    selected_rows = pd.concat([y_1_rows, y_0_rows])
+    return selected_rows
+
+##from sklearn.metrics import confusion_matrix
+##i did it manually because when there is 0 of some category there different length to conf matrix
+# manual conf matrix
+def confusion_matrix_manual(validation_y,binary_preds):
+    TP = sum((validation_y == 1) & (binary_preds == 1))
+    FP = sum((validation_y == 0) & (binary_preds == 1))
+    FN = sum((validation_y == 1) & (binary_preds == 0))
+    TN = sum((validation_y == 0) & (binary_preds == 0))
+    # Construct the confusion matrix
+    conf_matrix_manual = np.array([[TP, FP], [FN, TN]])
+    return  conf_matrix_manual
+# True Positives (TP): top left
+# True Negatives (TN): bottom right.
+# False Positives (FP): top right.
+# False Negatives (FN): bottom left
+
+
+# "Calculate evaluation metrics from a confusion matrix and append them to a DataFrame." + save the results + comment if needed
+def add_metrics_to_df(model_name, confusion_table, comment, MAE):
+    # Extract values from the confusion table
+    TP, FP, FN, TN = confusion_table.ravel()
+
+    # Calculate evaluation metrics
+    # Accuracy: Measures the overall correctness of predictions
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+    # Precision: Evaluates the accuracy of positive predictions.
+    precision = TP / (TP + FP) if (TP + FP)>0 else 0
+    # Recall (Sensitivity or True Positive Rate): Assesses the ability to identify all positive instances.
+    recall = TP / (TP + FN) if (TP + FN) >0 else 0
+    # F1-Score (F-measure): Balances precision and recall into a single metric.
+    f1_measure = 2 * (precision * recall) / (precision + recall) if (precision + recall) >0 else 0
+
+    # Create a new DataFrame to append to existing data
+    new_data = pd.DataFrame({
+        'Model': [model_name],
+        'TP': [TP],
+        'FP': [FP],
+        'FN': [FN],
+        'TN': [TN],
+        'Accuracy': [accuracy],
+        'Precision': [precision],
+        'Recall': [recall],
+        'F1-Measure': [f1_measure],
+        'comment': [comment],
+        'MAE': [MAE]
+    })
+
+    # Ensure column consistency before concatenation
+    df = pd.read_csv('evaluation_of_models.csv')
+
+    # Concatenate DataFrames using the combined columns
+    df = pd.concat([df, new_data],ignore_index=False)
+
+    # Save the DataFrame to a CSV file
+    df.to_csv('evaluation_of_models.csv', index=False)
+
+    return df
+
+#df of evaluating all models data
+All_Models_df = pd.DataFrame(columns=['Model', 'TP', 'FP', 'FN', 'TN', 'Accuracy', 'Precision', 'Recall', 'F1-Measure','comment','MAE'])
+
+## return STDEV, Mean, Std Error Mean of accuracies of each model
+def calculate_accuracy_metrics(csv_file):
+    # Read data from CSV file
+    data = pd.read_csv(csv_file)
+    # Group by 'model_name' and calculate mean and standard deviation of accuracy
+    grouped_data = data.groupby('Model')['Accuracy'].agg(['mean', 'std']).reset_index()
+    grouped_data.columns = ['Model', 'accuracy_mean', 'accuracy_std']
+    # Ensure column consistency before concatenation
+    df = pd.read_csv("C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/py project/AVG-STDEV.csv")
+    # Concatenate DataFrames using the combined columns
+    df = pd.concat([df, grouped_data], ignore_index=False)
+    # Save the DataFrame to a CSV file
+    df.to_csv('AVG-STDEV.csv', index=False)
+    return grouped_data
+
+##make Levene's test and t - test
+from scipy import stats
+def calc_stats (csv_file):
+    data = pd.read_csv(csv_file)
+    #before improve
+    # group1 = data.loc[data['Model'] == 'Desicion Tree', 'Accuracy']
+    # group2 = data.loc[data['Model'] == 'Support Vector Classifier', 'Accuracy']
+    #after improve
+    group1 = data.loc[data['Model'] == 'RandomForestClassifier', 'Accuracy']
+    group2 = data.loc[data['Model'] == 'Improved SupportVectorClassifier', 'Accuracy']
+    levene_stat, levene_p_value = stats.levene(group1, group2)
+    t_stat, t_p_value = stats.ttest_ind(group1, group2, equal_var=True)
+
+    new_data = pd.DataFrame({
+        'levene_stat': [levene_stat],
+        'levene_p_value':[levene_p_value],
+        't_stat': [t_stat],
+        't_p_value':[t_p_value]
+    })
+    # Ensure column consistency before concatenation
+    df = pd.read_csv('calc_stats.csv')
+    # Concatenate DataFrames using the combined columns
+    df = pd.concat([df, new_data], ignore_index=False)
+    # Save the DataFrame to a CSV file
+    df.to_csv('calc_stats.csv', index=False)
+    return df
+
+
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+
+ #Decision trees:
+
+creditCard_path = "C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/לפרוייקט/creditcard.csv"
+creditCard = pd.read_csv(creditCard_path)
+
+# 1. Activate the dataset
+from sklearn.metrics import mean_absolute_error
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+
+def Pseudo_DT(dataset,N,n_fraud):
+    dataset=get_random_rows(dataset,'Class',N,n_fraud)
+    # 2. Randomly divide the dataset into a training dataset (80%) and a testing dataset (20%)
+    # 3. Configure the target variable
+    y = dataset.pop('Class') ## to be predicted
+    X = dataset ##Factors
+    #stratify=y keeps the proportions
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,  stratify=y,random_state=42)
+
+    # 4. Based on the training set, create the decision tree classifier
+    max_depth_value = 5
+    classifier = DecisionTreeClassifier(max_depth=max_depth_value)
+    classifier.fit(X_train, y_train)
+    # 5. Utilize the max depth kernel parameter to train the classifier.
+
+    # 6. Using the training dataset, predict the testing set.
+    y_pred = classifier.predict(X_test)
+    # 7. Evaluate the classifier
+
+    binary_predictions = (y_pred > 0.5).astype('int32')
+    # Calculate Mean Absolute Error (MAE)
+    MAE = mean_absolute_error(y_test, binary_predictions)
+    conf_matrix = confusion_matrix_manual(y_test, binary_predictions)
+    comment="N="+str(N)
+    add_metrics_to_df('Desicion Tree', conf_matrix,comment, MAE)
+
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+
+#Improved Decision trees:
+############## Pseudocode for Random Forest Classifier Method
+#*********************************************
+
+
+from sklearn.metrics import mean_absolute_error
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+
+def Pseudo_RFC(dataset,N,n_fraud):
+    # #Psuedo Step 1.Activate the dataset.
+    dataset=get_random_rows(dataset,'Class',N,n_fraud)
+    # 2. Randomly divide the dataset into a training dataset (80%) and a testing dataset (20%)
+    # 3. Configure the target variable
+    y = dataset.pop('Class') ## to be predicted
+    X = dataset ##Factors
+    #stratify=y keeps the proportions
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,  stratify=y,random_state=42)
+
+    # 4. Based on the training set, create the decision tree classifier
+    # 5. Utilize the max depth kernel parameter to train the classifier.
+    classifier = DecisionTreeClassifier(max_depth=5)
+    classifier.fit(X_train, y_train)
+    # 6. Using the training dataset, predict the testing set.
+    y_pred = classifier.predict(X_test)
+    # 7. Evaluate the classifier
+    binary_predictions = (y_pred > 0.5).astype('int32')
+    # Calculate Mean Absolute Error (MAE)
+    MAE = mean_absolute_error(y_test, binary_predictions)
+    conf_matrix = confusion_matrix_manual(y_test, binary_predictions)
+    comment="N="+str(N)
+    add_metrics_to_df('RandomForestClassifier', conf_matrix,comment, MAE)
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+#SVC:
+##
+from sklearn.svm import SVC
+from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import accuracy_score
+def Pseudo_SVC(dataset, N, n_fraud):
+    dataset = get_random_rows(dataset, 'Class', N, n_fraud)
+
+    # 2. Randomly divide the dataset into a training dataset (80%) and a testing dataset (20%)
+    y = dataset.pop('Class')  # Target variable
+    X = dataset  # Features
+    #stratify=y keeps the proportions
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+    # 3. Create the SVC classifier
+    svc_params = {'C': 1.0, 'kernel': 'rbf', 'gamma': 'scale'}  # Example parameters for SVC
+    classifier = SVC(**svc_params, probability=True)
+    classifier.fit(X_train, y_train)
+
+    # 4. The value for the parameter was a trade off. - Example: Varying C values to find optimal performance
+    c_values = [0.1, 1.0, 10.0]
+    accuracies = []
+    for c_val in c_values:
+        svc_params['C'] = c_val
+        classifier = SVC(**svc_params, probability=True)
+        classifier.fit(X_train, y_train)
+        y_pred = classifier.predict(X_test)
+        accuracies.append(accuracy_score(y_test, y_pred))
+
+    best_c_value = c_values[np.argmax(accuracies)]
+    svc_params['C'] = best_c_value  # Use the best C value found
+    classifier = SVC(**svc_params, probability=True)
+    classifier.fit(X_train, y_train)
+
+    # 5. Create a decision tree using SVC classifiers and forecast the outcome for each sample
+    svc_classifier = SVC(**svc_params, probability=True)
+    dt_classifier = DecisionTreeClassifier(max_depth=5)
+    voting_classifier = VotingClassifier(estimators=[('svc', svc_classifier), ('dt', dt_classifier)], voting='soft')
+    voting_classifier.fit(X_train, y_train)
+    y_pred_voting = voting_classifier.predict(X_test)
+
+    # 6. Voting was done for each predicted outcome
+    # 7. The final result was chosen based on the results of the most popular predictions
+    # # If your predictions are probabilities and you need binary predictions
+    binary_predictions = (y_pred_voting > 0.5).astype('int32')
+    # Calculate Mean Absolute Error (MAE)
+    MAE = mean_absolute_error(y_test, binary_predictions)
+    conf_matrix = confusion_matrix_manual(y_test, binary_predictions)
+    comment = "N=" + str(N)
+    add_metrics_to_df('Improved Support Vector Classifier', conf_matrix, comment, MAE)
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+#Improved SVC:
+##
+from sklearn.svm import SVC
+from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import accuracy_score
+
+def Updated_Pseudo_SVC(dataset, N, n_fraud):
+    dataset = get_random_rows(dataset, 'Class', N, n_fraud)
+
+    # 2. Randomly divide the dataset into a training dataset (80%) and a testing dataset (20%)
+    y = dataset.pop('Class')  # Target variable
+    X = dataset  # Features
+    #stratify=y keeps the proportions
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+
+    # 3. Create the SVC classifier
+    svc_params = {'C': 1.0, 'kernel': 'rbf', 'gamma': 'scale'}  # Example parameters for SVC
+    classifier = SVC(**svc_params, probability=True)
+    classifier.fit(X_train, y_train)
+
+    # 4. The value for the parameter was a trade off. - Example: Varying C values to find optimal performance
+    c_values = [0.1, 1.0, 10.0]
+    accuracies = []
+    for c_val in c_values:
+        svc_params['C'] = c_val
+        classifier = SVC(**svc_params, probability=True)
+        classifier.fit(X_train, y_train)
+        y_pred = classifier.predict(X_test)
+        accuracies.append(accuracy_score(y_test, y_pred))
+
+    best_c_value = c_values[np.argmax(accuracies)]
+    svc_params['C'] = best_c_value  # Use the best C value found
+    classifier = SVC(**svc_params, probability=True)
+    classifier.fit(X_train, y_train)
+
+    # 5. Create a decision tree using SVC classifiers and forecast the outcome for each sample
+    svc_classifier = SVC(**svc_params, probability=True)
+    dt_classifier = DecisionTreeClassifier(max_depth=5)
+    voting_classifier = VotingClassifier(estimators=[('svc', svc_classifier), ('dt', dt_classifier)], voting='soft')
+    voting_classifier.fit(X_train, y_train)
+    y_pred_voting = voting_classifier.predict(X_test)
+
+    # 6. Voting was done for each predicted outcome
+    # 7. The final result was chosen based on the results of the most popular predictions
+    # # If your predictions are probabilities and you need binary predictions
+    binary_predictions = (y_pred_voting > 0.5).astype('int32')
+    # Calculate Mean Absolute Error (MAE)
+    MAE = mean_absolute_error(y_test, binary_predictions)
+    conf_matrix = confusion_matrix_manual(y_test, binary_predictions)
+    comment = "N=" + str(N)
+    add_metrics_to_df('Improved SupportVectorClassifier', conf_matrix, comment, MAE)
+
+
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+##data mining:
+#Nueral system:
+
+from sklearn.utils.class_weight import compute_class_weight
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.callbacks import EarlyStopping
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from imblearn.over_sampling import SMOTE
+import numpy as np
+
+def Pseudo_Neural_System(dataset):
+    import matplotlib.pyplot as plt
+    y = dataset.pop('Class')  ## to be predicted
+    X = dataset  ##Factors
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Apply SMOTE to the training set
+    smote = SMOTE(k_neighbors=1, random_state=42)  # Adjust k_neighbors to a lower value
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+    # Compute class weights for the resampled data
+    class_labels = np.unique(y_train_resampled)
+    class_weights = compute_class_weight(class_weight='balanced', classes=class_labels, y=y_train_resampled)
+    # Define the neural network model
+    model = Sequential()
+    model.add(Dense(64, input_shape=(X_train.shape[1],), activation='relu')) #for linear and eliminate neg
+    model.add(Dense(32, activation='relu')) #add depth to define also more non linear matters
+    model.add(Dense(1, activation='sigmoid')) #Binary output
+
+    # Compile the model with class weights
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']) #Binary classification
+
+    # Define early stopping criteria to avoid overFitting
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+
+    # Train the model with early stopping and class weights
+    class_weights = dict(zip(class_labels, class_weights))
+    history = model.fit(X_train_resampled, y_train_resampled, epochs=100, batch_size=64, validation_split=0.2,
+              class_weight=class_weights, callbacks=[early_stopping], verbose=1)
+
+    # Evaluate on the test set
+    y_pred_prob = model.predict(X_test)
+    binary_predictions = (y_pred_prob > 0.5).astype('int32').ravel()
+    conf_matrix = confusion_matrix_manual(y_test, binary_predictions)
+
+    # Calculate Mean Absolute Error (MAE)
+    MAE = mean_absolute_error(y_test, binary_predictions)
+
+    comment = "N=" + str(len(dataset))
+
+    add_metrics_to_df('Nueral System', conf_matrix, comment, MAE)
+
+
+    # Plot training & validation accuracy values
+    ##plotting results
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+
+    # Plot training & validation loss values
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+
+    plt.tight_layout()
+    plt.show()
+
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+#*************************************************************************#*************************************************************************
+
+
+###TOC:
+###rows        Description
+###10-34       plot histograms of all variables
+###37-51       plotting pie to show the proportion of 1 and 0 in y
+###55-79      plotting MI graph
+###88-200     Helpful Methods
+###214-250     Decision Tree
+###261-294     RandomForestClassifier
+###303-352     SVC - Support Vector Classifier
+###361-412     Improved Support Vector Classifier
+###423-495     Nueral System + plot loss value and accuracy of test and train
+###520+        Main
+
+###notes for research:
+#to change n_fraud go to row 526
+#to switch between before and after improve go to row 528 and ativate the necessary ones + go to rows 182 and choose the relevant 2 groups
+
+# initiate code
+creditCard_path = "C:/Users/nmaayan/OneDrive - Intel Corporation/Desktop/1st degree/שנה ד/כריית נתונים/לפרוייקט/creditcard.csv"
+creditCard= pd.read_csv(creditCard_path)
+
+for N in range(600,1100,50):
+    n_fraud=N/2
+    # n_fraud=21
+    # Pseudo_DT(creditCard, N, n_fraud)
+    # Pseudo_SVC(creditCard, N, n_fraud)
+    # Pseudo_RFC(creditCard, N, n_fraud)
+    # Updated_Pseudo_SVC(creditCard, N, n_fraud)
+# print(calculate_accuracy_metrics('evaluation_of_models.csv'))
+# print(calc_stats('evaluation_of_models.csv'))
+
+Pseudo_Neural_System(creditCard)
