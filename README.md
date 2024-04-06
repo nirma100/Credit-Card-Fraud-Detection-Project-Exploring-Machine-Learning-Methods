@@ -3,8 +3,11 @@
 
 This repository contains a data mining project focused on credit card fraud detection. The project explores various methods, including Support Vector Classification (SVC), Logistic Regression (LT), and Neural Networks, to detect fraudulent transactions.
 
-## Project Structure
+# References:
+Link to DB : https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+Link to the article : https://sifisheriessciences.com/journal/index.php/journal/article/view/463/446
 
+## Project Structure
 The project directory is structured as follows:
 
 - **evaluation_of_models/**: CSV Output which reflect the models statistic factors abd confusion tables.
@@ -21,6 +24,22 @@ The project directory is structured as follows:
 ###361-412     Improved Support Vector Classifier
 ###423-495     Nueral System + plot loss value and accuracy of test and train
 ###520+        Main
+
+
+### Table of Contents of the python file:
+
+| Rows     | Description                                                               |
+|----------|---------------------------------------------------------------------------|
+| 10-34    | [Histograms of All Variables](#histograms-of-all-variables)               |
+| 37-51    | [Pie Chart of Class Proportions](#pie-chart-of-class-proportions)         |
+| 55-79    | [Mutual Information Graph](#mutual-information-graph)                     |
+| 88-200   | [Helpful Methods](#helpful-methods)                                       |
+| 214-250  | [Decision Tree](#decision-tree)                                           |
+| 261-294  | [RandomForestClassifier](#randomforestclassifier)                         |
+| 303-352  | [SVC - Support Vector Classifier](#svc---support-vector-classifier)       |
+| 361-412  | [Improved Support Vector Classifier](#improved-support-vector-classifier) |
+| 423-495  | [Neural System](#neural-system)                                           |
+| 520+     | [Main](#main)                                                             |
 
 - **AVG-STDEV/**: Output that Review the mean and std of the Accuracy of the models.
 - **calc_stat/**: Output that Review the statistics tests factor.
