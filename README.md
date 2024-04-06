@@ -61,9 +61,8 @@ git clone https://github.com/your-username/credit-card-fraud-detection.git
 2. **Download Dataset**: Download the credit card CSV file from Kaggle using the following [link](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
 
 3. **Clone Repository**: 
-    ```
  [Download Repository](https://github.com/nirma100/Credit-Card-Fraud-Detection-Project-Exploring-Machine-Learning-Methods.git)
-    ```
+    
 
 4. **Update File Paths**: If necessary, update file paths in the code to match your local file structure. Look for lines referencing file paths (e.g., Line 15,41,63,216,521) and adjust them accordingly.
 
