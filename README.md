@@ -1,5 +1,5 @@
 **README**
-# DataMiningProject
+# Credit Card Fraud Detection Project: Exploring Machine Learning Methods
 
 # Credit Card Fraud Detection Project
 
