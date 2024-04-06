@@ -4,27 +4,14 @@
 This repository contains a data mining project focused on credit card fraud detection. The project explores various methods, including Support Vector Classification (SVC), Logistic Regression (LT), and Neural Networks, to detect fraudulent transactions.
 
 # References:
-Link to DB : https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
-Link to the article : https://sifisheriessciences.com/journal/index.php/journal/article/view/463/446
+**Link to DB :/** https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+**Link to the article :/** https://sifisheriessciences.com/journal/index.php/journal/article/view/463/446
 
 ## Project Structure
 The project directory is structured as follows:
 
 - **evaluation_of_models/**: CSV Output which reflect the models statistic factors abd confusion tables.
 - **main/**: Includes the Python scripts for data preprocessing, model training, and evaluation.
-###TOC:
-###rows        Description
-###10-34       plot histograms of all variables
-###37-51       plotting pie to show the proportion of 1 and 0 in y
-###55-79       plotting MI graph
-###88-200      Helpful Methods
-###214-250     Decision Tree
-###261-294     RandomForestClassifier
-###303-352     SVC - Support Vector Classifier
-###361-412     Improved Support Vector Classifier
-###423-495     Nueral System + plot loss value and accuracy of test and train
-###520+        Main
-
 
 ### Table of Contents of the python file:
 
