@@ -1,8 +1,6 @@
 **README**
 # Credit Card Fraud Detection Project: Exploring Machine Learning Methods
 
-# Credit Card Fraud Detection Project
-
 This repository contains a data mining project focused on credit card fraud detection. The project explores various methods, including Support Vector Classification (SVC), Logistic Regression (LT), and Neural Networks, to detect fraudulent transactions.
 
 ## Project Structure
